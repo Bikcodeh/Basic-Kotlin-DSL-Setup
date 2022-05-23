@@ -1,4 +1,4 @@
-# GoogleMapsDemo
+# Kotlin DSL Setup
 
 This dummy project is only for study purposes, implementing:
 
