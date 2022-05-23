@@ -27,14 +27,13 @@ android {
 
         val properties = Properties()
         properties.load(FileInputStream(rootProject.file("config.properties")))
-        //val apiKey = gradleLocalProperties(rootDir).getProperty("MAPS_API_KEY_DEBUG")
 
         getByName("debug") {
             val apiKeyDebug = properties.getProperty("MAPS_API_KEY_DEBUG")
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
             isMinifyEnabled = false
             isDebuggable = true
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-dev"
             buildConfigField(
                 type = "String",
                 name = "MAPS_API_KEY",
@@ -45,7 +44,8 @@ android {
 
         getByName("release") {
             val apiKeyRelease = properties.getProperty("MAPS_API_KEY")
-            //val apiKeyRelease = gradleLocalProperties(rootDir).getProperty("MAPS_API_KEY")
+            versionNameSuffix = "-full"
+            applicationIdSuffix = ".prod"
 
             isMinifyEnabled = false
             isDebuggable = false
@@ -58,9 +58,21 @@ android {
                 name = "MAPS_API_KEY",
                 value = apiKeyRelease
             )
-            manifestPlaceholders["API_KEY"] = apiKeyRelease
+            manifestPlaceholders.putAll(mapOf(
+                "API_KEY" to apiKeyRelease
+            ))
+        }
+
+        applicationVariants.all {
+            val variant = this
+            variant.outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+                .forEach { output ->
+                    val outputFileName = "googleMaps-${variant.versionName}-${variant.baseName}.apk"
+                    output.outputFileName = outputFileName
+                }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
